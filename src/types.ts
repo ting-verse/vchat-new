@@ -6,7 +6,6 @@ export interface ConversationProps {
   updatedAt: string;
   providerId: number;
 }
-
 export interface ProviderProps {
   id: number;
   name: string;
@@ -17,7 +16,6 @@ export interface ProviderProps {
   updatedAt: string;
   models: string[];
 }
-
 export type MessageStatus = "loading" | "streaming" | "finished";
 
 export interface MessageProps {
@@ -36,3 +34,12 @@ export interface CreateChatProps {
   selectedModel: string;
   messageId: number;
 }
+
+export interface UpdatgedStreamData {
+  messageId: number;
+  data: {
+    is_end: boolean;
+    result: string;
+  };
+}
+export type OnUpdatedCallback = (data: UpdatgedStreamData) => void;

@@ -17,7 +17,7 @@
                   :alt="provider.name"
                   class="h-5 w-5 mr-2 rounded"
                 />
-                {{ provider.name }}
+                {{ provider.title }}
               </SelectLabel>
               <SelectGroup>
                 <SelectItem
