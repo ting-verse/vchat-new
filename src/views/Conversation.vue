@@ -10,7 +10,11 @@
     <MessageList :messages="filteredMessages" />
   </div>
   <div class="w-[80%] mx-auto h-[15%] flex items-center">
-    <MessageInput @create="sendNewMessage" v-model="inputValue" />
+    <MessageInput
+      @create="sendNewMessage"
+      v-model="inputValue"
+      :disabled="messageStore.isMessageLoading"
+    />
   </div>
 </template>
 <script lang="ts" setup>
@@ -20,12 +24,14 @@ import MessageInput from "../components/MessageInput.vue";
 import MessageList from "../components/MessageList.vue";
 import { useConversationStore } from "../stores/conversation";
 import { useMessageStore } from "../stores/message";
-import { MessageProps, ConversationProps, MessageStatus } from "../types";
+import { useProviderStore } from "../stores/provider";
+import { MessageProps } from "../types";
 import { db } from "../db";
 const inputValue = ref("");
 const route = useRoute();
 const conversationStore = useConversationStore();
 const messageStore = useMessageStore();
+const provdierStore = useProviderStore();
 const filteredMessages = computed(() => messageStore.items);
 const sendedMessages = computed(() =>
   filteredMessages.value
@@ -70,9 +76,9 @@ const creatingInitialMessage = async () => {
   };
   const newMessageId = await messageStore.createMessage(createdData);
   if (convsersation.value) {
-    const provider = await db.providers
-      .where({ id: convsersation.value.providerId })
-      .first();
+    const provider = provdierStore.getProviderById(
+      convsersation.value.providerId
+    );
     if (provider) {
       console.log("provider", provider);
       await window.electronAPI.startChat({

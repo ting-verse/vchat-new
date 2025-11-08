@@ -1,19 +1,28 @@
 <template>
   <div
-    class="message-input flex w-full border items-center shadow-sm rounded-lg border-gray-300 py-1 px-2 focus-within:border-green-700"
+    class="message-input w-full shadow-sm border rounded-lg border-gray-300 flex items-center py-1 px-2 focus-within:border-green-700"
   >
     <input
+      class="outline-none border-0 flex-1 bg-white focus:ring-0"
       type="text"
-      class="flex-1 outline-none border-0 bg-white focus:ring-0"
       v-model="model"
+      :disabled="disabled"
     />
-    <Button icon-name="radix-icons:paper-plane" @click="onCreate">发送</Button>
+    <Button
+      icon-name="radix-icons:paper-plane"
+      @click="onCreate"
+      :disabled="disabled"
+    >
+      发送
+    </Button>
   </div>
 </template>
 
 <script lang="ts" setup>
 import Button from "./Button.vue";
-
+defineProps<{
+  disabled?: boolean;
+}>();
 const emit = defineEmits<{
   create: [value: string];
 }>();
