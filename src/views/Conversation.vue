@@ -7,7 +7,7 @@
     <span class="text-sm text-gray-500">{{ convsersation.updatedAt }}</span>
   </div>
   <div class="w-[80%] mx-auto h-[75%] overflow-y-auto pt-2">
-    <MessageList :messages="filteredMessages" />
+    <MessageList :messages="filteredMessages" ref="messageListRef" />
   </div>
   <div class="w-[80%] mx-auto h-[15%] flex items-center">
     <MessageInput
@@ -18,16 +18,17 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, watch, onMounted, computed } from "vue";
+import { ref, watch, onMounted, computed, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import MessageInput from "../components/MessageInput.vue";
 import MessageList from "../components/MessageList.vue";
 import { useConversationStore } from "../stores/conversation";
 import { useMessageStore } from "../stores/message";
 import { useProviderStore } from "../stores/provider";
-import { MessageProps } from "../types";
+import { MessageProps, MessageListInstance } from "../types";
 import { db } from "../db";
 const inputValue = ref("");
+const messageListRef = ref<MessageListInstance>();
 const route = useRoute();
 const conversationStore = useConversationStore();
 const messageStore = useMessageStore();
@@ -65,6 +66,15 @@ const sendNewMessage = async (question: string) => {
     creatingInitialMessage();
   }
 };
+const messageScrollToBottom = async () => {
+  await nextTick();
+  if (messageListRef.value) {
+    messageListRef.value.ref.scrollIntoView({
+      block: "end",
+      behavior: "smooth",
+    });
+  }
+};
 const creatingInitialMessage = async () => {
   const createdData: Omit<MessageProps, "id"> = {
     content: "",
@@ -95,10 +105,12 @@ watch(
   async (newId: string) => {
     conversationId.value = parseInt(newId);
     await messageStore.fetchMessagesByConversation(conversationId.value);
+    await messageScrollToBottom();
   }
 );
 onMounted(async () => {
   await messageStore.fetchMessagesByConversation(conversationId.value);
+  await messageScrollToBottom();
   if (initMessageId) {
     await creatingInitialMessage();
   }
