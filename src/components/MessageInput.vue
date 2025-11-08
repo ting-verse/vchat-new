@@ -54,7 +54,7 @@ const props = defineProps<{
   disabled?: boolean;
 }>();
 const emit = defineEmits<{
-  create: [value: string];
+  create: [value: string, imagePath?: string];
 }>();
 const model = defineModel<string>();
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -64,11 +64,12 @@ const triggerFileInput = () => {
     fileInput.value?.click();
   }
 };
+let selectedImage: File | null = null;
 const handleImageUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files && target.files.length > 0) {
     console.log(target.files[0]);
-    const selectedImage = target.files[0];
+    selectedImage = target.files[0];
     const reader = new FileReader();
     reader.onload = (e) => {
       console.log(e.target?.result);
@@ -79,7 +80,7 @@ const handleImageUpload = (event: Event) => {
 };
 const onCreate = () => {
   if (model.value && model.value.trim() !== "") {
-    emit("create", model.value);
+    emit("create", model.value, selectedImage?.path || undefined);
   }
 };
 </script>
