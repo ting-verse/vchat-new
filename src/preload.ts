@@ -6,6 +6,7 @@ import { CreateChatProps, OnUpdatedCallback } from "./types";
 export interface AppConfig {
   language: string;
   fontSize: number;
+  providerSettings: Record<string, Record<string, string>>;
 }
 
 contextBridge.exposeInMainWorld("electronAPI", {

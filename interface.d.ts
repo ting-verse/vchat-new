@@ -3,6 +3,7 @@ import { CreateChatProps, OnUpdatedCallback } from "./src/types";
 export interface AppConfig {
   language: string;
   fontSize: number;
+  providerSettings: Record<string, Record<string, string>>;
 }
 
 export interface IElectronAPI {

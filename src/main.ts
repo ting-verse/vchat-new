@@ -5,6 +5,10 @@ import path from "path";
 import fs from "fs/promises";
 import url from "url";
 import "dotenv/config";
+import { defaultProviderSettings } from "./config/providerConfigs";
+
+const clone = <T>(value: T): T =>
+  JSON.parse(JSON.stringify(value)) as T;
 import { CreateChatProps } from "./types";
 import { convertMessages } from "./helper";
 import { createProvider } from "./providers/createProvider";
@@ -13,13 +17,32 @@ import { createProvider } from "./providers/createProvider";
 interface AppConfig {
   language: string;
   fontSize: number;
+  providerSettings: Record<string, Record<string, string>>;
 }
 
-// 默认配置
-const DEFAULT_CONFIG: AppConfig = {
+const createDefaultConfig = (): AppConfig => ({
   language: "zh-CN",
   fontSize: 14,
+  providerSettings: clone(defaultProviderSettings),
+});
+
+const mergeProviderSettings = (
+  existing?: Record<string, Record<string, string>>
+) => {
+  const merged = clone(defaultProviderSettings);
+  if (existing) {
+    for (const [providerName, settings] of Object.entries(existing)) {
+      merged[providerName] = {
+        ...(merged[providerName] || {}),
+        ...settings,
+      };
+    }
+  }
+  return merged;
 };
+
+// 默认配置
+const DEFAULT_CONFIG: AppConfig = createDefaultConfig();
 
 // 获取配置文件路径
 const getConfigPath = (): string => {
@@ -32,12 +55,15 @@ const readConfig = async (): Promise<AppConfig> => {
   try {
     const configPath = getConfigPath();
     const data = await fs.readFile(configPath, "utf-8");
-    const config = JSON.parse(data) as AppConfig;
-    // 合并默认配置，确保所有字段都存在
-    return { ...DEFAULT_CONFIG, ...config };
+    const config = JSON.parse(data) as Partial<AppConfig>;
+    return {
+      language: config.language ?? DEFAULT_CONFIG.language,
+      fontSize: config.fontSize ?? DEFAULT_CONFIG.fontSize,
+      providerSettings: mergeProviderSettings(config.providerSettings),
+    };
   } catch (error) {
     // 如果文件不存在或读取失败，返回默认配置
-    return DEFAULT_CONFIG;
+    return createDefaultConfig();
   }
 };
 
