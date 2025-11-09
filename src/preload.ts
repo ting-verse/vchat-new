@@ -3,10 +3,19 @@
 import { ipcRenderer, contextBridge } from "electron";
 import { CreateChatProps, OnUpdatedCallback } from "./types";
 
+export interface AppConfig {
+  language: string;
+  fontSize: number;
+}
+
 contextBridge.exposeInMainWorld("electronAPI", {
   startChat: (data: CreateChatProps) => ipcRenderer.send("start-chat", data),
   onUpdateMessage: (callback: OnUpdatedCallback) =>
     ipcRenderer.on("update-message", (_event, data) => callback(data)),
   copyImageToUserDir: (sourcePath: string) =>
     ipcRenderer.invoke("copy-image-to-user-dir", sourcePath),
+  getAppConfig: (): Promise<AppConfig> =>
+    ipcRenderer.invoke("get-app-config"),
+  saveAppConfig: (config: AppConfig): Promise<boolean> =>
+    ipcRenderer.invoke("save-app-config", config),
 });

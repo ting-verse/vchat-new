@@ -8,6 +8,45 @@ import "dotenv/config";
 import { CreateChatProps } from "./types";
 import { convertMessages } from "./helper";
 import { createProvider } from "./providers/createProvider";
+
+// 配置文件接口
+interface AppConfig {
+  language: string;
+  fontSize: number;
+}
+
+// 默认配置
+const DEFAULT_CONFIG: AppConfig = {
+  language: "zh-CN",
+  fontSize: 14,
+};
+
+// 获取配置文件路径
+const getConfigPath = (): string => {
+  const userDataPath = app.getPath("userData");
+  return path.join(userDataPath, "config.json");
+};
+
+// 读取配置文件
+const readConfig = async (): Promise<AppConfig> => {
+  try {
+    const configPath = getConfigPath();
+    const data = await fs.readFile(configPath, "utf-8");
+    const config = JSON.parse(data) as AppConfig;
+    // 合并默认配置，确保所有字段都存在
+    return { ...DEFAULT_CONFIG, ...config };
+  } catch (error) {
+    // 如果文件不存在或读取失败，返回默认配置
+    return DEFAULT_CONFIG;
+  }
+};
+
+// 保存配置文件
+const saveConfig = async (config: AppConfig): Promise<void> => {
+  const configPath = getConfigPath();
+  await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf-8");
+};
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
   app.quit();
@@ -50,6 +89,18 @@ const createWindow = async () => {
       return destPath;
     }
   );
+  
+  // 读取配置文件
+  ipcMain.handle("get-app-config", async () => {
+    return await readConfig();
+  });
+  
+  // 保存配置文件
+  ipcMain.handle("save-app-config", async (event, config: AppConfig) => {
+    await saveConfig(config);
+    return true;
+  });
+  
   ipcMain.on("start-chat", async (event, data: CreateChatProps) => {
     console.log("hey", data);
     const { providerName, messages, messageId, selectedModel } = data;

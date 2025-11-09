@@ -4,7 +4,7 @@
       <SelectTrigger
         class="flex w-full items-center justify-between rounded-md py-1.5 px-3 shadow-sm border outline-none data-[placeholder]:text-gray-400"
       >
-        <SelectValue placeholder="Select a model..." />
+        <SelectValue :placeholder="$t('provider.selectModel')" />
         <Icon icon="radix-icons:chevron-down" class="h-5 w-5" />
       </SelectTrigger>
       <SelectPortal>

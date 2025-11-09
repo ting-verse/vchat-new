@@ -40,7 +40,7 @@
         @click="onCreate"
         :disabled="disabled"
       >
-        发送
+        {{ $t("common.send") }}
       </Button>
     </div>
   </div>
